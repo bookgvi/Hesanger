@@ -1,5 +1,25 @@
 <html>
 <body>
-    <div>Hello main page!</div>
+<div>
+    <form method="post" action="add">
+        <input type="text" name="text" placeholder="Input message"/>
+        <input type="text" name="tag" placeholder="tag"/>
+        <button type="submit">Add</button>
+    </form>
+</div>
+<div>
+    <form method="post" action="filter">
+        <input type="text" name="tag"/>
+        <button type="submit">Filter</button>
+    </form>
+</div>
+<h2>Message List</h2>
+{{#messages}}
+<div>
+    <b>{{id}}</b>
+    <span>{{text}}</span>
+    <i>{{tag}}</i>
+</div>
+{{/messages}}
 </body>
 </html>
