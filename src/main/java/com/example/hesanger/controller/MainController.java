@@ -2,13 +2,18 @@ package com.example.hesanger.controller;
 
 import com.example.hesanger.Repos.MessageRepo;
 import com.example.hesanger.domain.Message;
+import com.example.hesanger.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class MainController {
@@ -16,11 +21,11 @@ public class MainController {
     private MessageRepo messageRepo;
 
     @GetMapping({"/", "/home"})
-    public String index(
-            @RequestParam(name = "name", required = false, defaultValue = "User") String name,
-            Map<String, Object> model
-    ) {
-        model.put("name", name);
+    public String index(Map<String, Object> model) {
+        Authentication authPrincipal = SecurityContextHolder.getContext().getAuthentication();
+        String authorName = authPrincipal.getName();
+
+        model.put("name", authorName);
         return "home";
     }
 
@@ -33,13 +38,12 @@ public class MainController {
 
     @PostMapping("/add")
     public String addRecord(
+            @AuthenticationPrincipal User author,
             @RequestParam String text,
             @RequestParam(defaultValue = "none") String tag,
             Map<String, Object> model
     ) {
-        Message msg = new Message();
-        msg.setText(text);
-        msg.setTag(tag);
+        Message msg = new Message(text, tag, author);
         messageRepo.save(msg);
 
 
