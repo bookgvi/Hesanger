@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spring Security Example </title>
+</head>
+<body>
+<!--<div th:if="${param.error}">-->
+<!--    Invalid username and password.-->
+<!--</div>-->
+<!--<div th:if="${param.logout}">-->
+<!--    You have been logged out.-->
+<!--</div>-->
+<h2>Add new user</h2>
+{{#message}}
+    {{message}}
+{{/message}}
+<form action="/registration" method="post">
+    <div><label> User Name : <input type="text" name="username"/> </label></div>
+    <div><label> Password: <input type="password" name="password"/> </label></div>
+    <div><input type="hidden" name="_csrf" value="{{_csrf.token}}" /></div>
+    <div><input type="submit" value="Add user"/></div>
+</form>
+
+<div>
+    <a href="/">HOME</a>
+</div>
+</body>
+</html>
