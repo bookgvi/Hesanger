@@ -30,33 +30,39 @@ public class MainController {
     }
 
     @GetMapping("/main")
-    public String greeting(Map<String, Object> model) {
-        Iterable<Message> messages = messageRepo.findAll();
+    public String filter(@RequestParam(defaultValue = "") String tag, Map<String, Object> model) {
+        Iterable<Message> messages;
+        if (tag == null || tag.isEmpty() || tag.equals("*")) {
+            messages = messageRepo.findAll();
+        } else {
+            tag = tag.equals(" ") ? "" : tag;
+            messages = messageRepo.findByTag(tag);
+        }
         model.put("messages", messages);
+        model.put("tag", tag);
         return "main";
     }
+
+//    @GetMapping("/main")
+//    public String greeting(Map<String, Object> model) {
+//        Iterable<Message> messages = messageRepo.findAll();
+//        model.put("messages", messages);
+//        return "main";
+//    }
 
     @PostMapping("/add")
     public String addRecord(
             @AuthenticationPrincipal User author,
             @RequestParam String text,
-            @RequestParam(defaultValue = "none") String tag,
+            @RequestParam(defaultValue = "") String tag,
             Map<String, Object> model
     ) {
         Message msg = new Message(text, tag, author);
         messageRepo.save(msg);
 
-
         model.put("messages", messageRepo.findAll());
+        model.put("tag", "");
         return "main";
     }
 
-    @PostMapping("/filter")
-    public String filter(@RequestParam String tag, Map<String, Object> model) {
-        Iterable<Message> messages;
-        if (tag == null || tag.equals("*")) messages = messageRepo.findAll();
-        else messages = messageRepo.findByTag(tag);
-        model.put("messages", messages);
-        return "main";
-    }
 }
