@@ -11,9 +11,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 public class MainController {
@@ -38,7 +41,18 @@ public class MainController {
             tag = tag.equals(" ") ? "" : tag;
             messages = messageRepo.findByTag(tag);
         }
-        model.put("messages", messages);
+
+        List<Message> filterdMessages = new ArrayList<>();
+        messages.forEach(elt -> {
+            if (elt.getFileName() == null) {
+                Message newMsg = new Message(elt);
+                newMsg.setFileName("1.jpg");
+                filterdMessages.add(newMsg);
+            } else {
+                filterdMessages.add(elt);
+            }
+        });
+        model.put("messages", filterdMessages);
         model.put("tag", tag);
         return "main";
     }
@@ -55,14 +69,31 @@ public class MainController {
             @AuthenticationPrincipal User author,
             @RequestParam String text,
             @RequestParam(defaultValue = "") String tag,
+            @RequestParam("file") MultipartFile file,
             Map<String, Object> model
-    ) {
+    ) throws IOException {
         Message msg = new Message(text, tag, author);
-        messageRepo.save(msg);
+        if (file != null) {
+            String uploadPath = getfilePath();
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdir();
+            }
+            String fileNameExt = UUID.randomUUID() + ".jpg";
 
+            file.transferTo(new File(uploadDir + "/" + fileNameExt));
+            msg.setFileName(fileNameExt);
+        }
+
+        messageRepo.save(msg);
         model.put("messages", messageRepo.findAll());
         model.put("tag", "");
-        return "main";
+        return "redirect:/main";
     }
 
+    private String getfilePath() throws IOException {
+        Properties props = new Properties();
+        props.load(this.getClass().getResourceAsStream("/application.properties"));
+        return props.getProperty("file.path");
+    }
 }

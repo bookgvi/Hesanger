@@ -11,6 +11,12 @@ public class Message {
     public Message() {
     }
 
+    public Message(Message msg) {
+        this.text = msg.getText();
+        this.tag = msg.getTag();
+        this.author = msg.getAuthor();
+    }
+
     public Message(String text, String tag, User author) {
         this.text = text;
         this.tag = tag;
@@ -22,10 +28,12 @@ public class Message {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private User author;
+    private String fileName;
 
     public String authorName() {
         return author != null ? author.getUsername() : "<none>";
     }
+
     public String getTag() {
         return tag;
     }
@@ -48,5 +56,13 @@ public class Message {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }
